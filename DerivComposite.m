@@ -32,17 +32,19 @@ classdef DerivComposite < DerivOperation
         
         % implement
         function z = forward(obj)
-            z = DerivVariable();
-            z.order = obj.var1.order;
+            N = obj.var1.order;
+            derivValues = cell(N + 1, 1);
             
             g_bar = obj.var2.flatValue();
             g_bar = g_bar(2:end);
             bellValuesMatrix = ...
-                DerivComposite.partialBellPoly(g_bar, z.order, z.order);
-            for k = 0:z.order
-                bellValues = bellValuesMatrix(k + 1, :);
-                z.setDeriv(k, obj.deriv(k, bellValues));
+                DerivComposite.partialBellPoly(g_bar, N, N);
+            for n = 0:N
+                bellValues = bellValuesMatrix(n + 1, :);
+                derivValues{n + 1} = obj.deriv(n, bellValues);
             end
+            
+            z = DerivVariable(derivValues{:});
         end
     end
     

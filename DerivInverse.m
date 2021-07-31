@@ -10,21 +10,23 @@ classdef DerivInverse < DerivOperation
         
         % implement
         function z = forward(obj)
-            z = DerivVariable();
-            z.order = obj.x.order;
+            N = obj.x.order;
+            derivValues = cell(N + 1, 1);
             
             x_0 = obj.x.deriv(0);
             z_0 = inv(x_0);
-            z.setDeriv(0, z_0);
-            for n = 1:z.order
+            derivValues{1} = z_0;
+            for n = 1:N
                 sum = 0;
                 for k = 0:n - 1
+                    z_k = derivValues{k + 1};
                 	sum = sum + ...
-                        nchoosek(n, k)*obj.x.deriv(n - k)*z.deriv(k);
+                        nchoosek(n, k)*obj.x.deriv(n - k)*z_k;
                 end
                 z_n = -z_0*sum;
-                z.setDeriv(n, z_n);
+                derivValues{n + 1} = z_n;
             end
+            z = DerivVariable(derivValues{:});
         end
     end
     

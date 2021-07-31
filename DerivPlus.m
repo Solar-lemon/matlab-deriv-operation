@@ -12,13 +12,13 @@ classdef DerivPlus < DerivOperation
         
         % implement
         function z = forward(obj)
-            z = DerivVariable();
-            z.order = max(obj.x1.order, obj.x2.order);
+            N = max(obj.x1.order, obj.x2.order);
+            derivValues = cell(N + 1, 1);
             
-            for k = 0:z.order
-                z_k = obj.x1.deriv(k) + obj.x2.deriv(k);
-                z.setDeriv(k, z_k);
+            for n = 0:N
+                derivValues{n + 1} = obj.x1.deriv(n) + obj.x2.deriv(n);
             end
+            z = DerivVariable(derivValues{:});
         end   
     end
 end

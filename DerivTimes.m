@@ -1,10 +1,10 @@
-classdef DerivMtimes < DerivOperation
+classdef DerivTimes < DerivOperation
     properties
         x1
         x2
     end
     methods
-        function obj = DerivMtimes(var1, var2)
+        function obj = DerivTimes(var1, var2)
             % var1: DerivVariable, var: DerivVariable
             obj.x1 = var1;
             obj.x2 = var2;
@@ -25,7 +25,7 @@ classdef DerivMtimes < DerivOperation
             % n: order
             z_n = 0;
             for k = 0:n
-                z_n = z_n + nchoosek(n, k)*obj.x1.deriv(n - k)*obj.x2.deriv(k);
+                z_n = z_n + nchoosek(n, k)*obj.x1.deriv(n - k).*obj.x2.deriv(k);
             end
         end
     end
@@ -34,33 +34,23 @@ classdef DerivMtimes < DerivOperation
         function test()
             clc
             
-            fprintf("== Test for DerivMtimes == \n")
+            fprintf("== Test for DerivTimes == \n")
             t = 1;
-            var1 = DerivVariable(...
-                diag([t^2, t]),...
-                diag([2*t, 1]),...
-                diag([2, 0]));
-            var2 = DerivVariable(...
-                diag([t^3, t]),...
-                diag([3*t^2, 1]),...
-                diag([6*t, 0]));
+            var = DerivVariable(...
+                [1, t], [0, 1]);
             
             fprintf("1. Using forward method \n")
-            var = DerivMtimes(var1, var2).forward();
+            newVar = DerivTimes(var, var).forward();
             fprintf("var.deriv(0): \n")
-            disp(var.deriv(0))
+            disp(newVar.deriv(0))
             fprintf("var.deriv(1): \n")
-            disp(var.deriv(1))
-            fprintf("var.deriv(2): \n")
-            disp(var.deriv(2))
+            disp(newVar.deriv(1))
             
             fprintf("2. Analytic result \n")
             fprintf("0-th order deriv: \n")
-            disp(diag([t^5, t^2]))
+            disp([1, t^2])
             fprintf("1-th order deriv: \n")
-            disp(diag([5*t^4, 2*t]))
-            fprintf("2-th order deriv: \n")
-            disp(diag([20*t^3, 2]))
+            disp([1, 2*t])
         end
     end
 end
