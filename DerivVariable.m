@@ -42,6 +42,18 @@ classdef DerivVariable < handle
             end
             obj.derivValues = varargin;
         end
+        
+        function out = flatValue(obj)
+            d = prod(obj.shape);
+            n = obj.order;
+            out = nan(d*(n + 1), 1);
+            
+            startIndex = 0;
+            for i = 1:n + 1
+                out(startIndex + 1:startIndex + d, :) = obj.derivValues{i};
+                startIndex = startIndex + d;
+            end
+        end
     end
     
     methods(Static)
