@@ -12,16 +12,17 @@ classdef DerivMtimes < DerivOperation
         
         % implement
         function z = forward(obj)
-            z = DerivVariable();
-            z.order = max(obj.x1.order, obj.x2.order);
+            N = max(obj.x1.order, obj.x2.order);
+            derivValues = cell(N + 1, 1);
             
-            for k = 0:z.order
-                z.setDeriv(k, obj.deriv(k));
+            for n = 0:N
+                derivValues{n + 1} = obj.deriv(n);
             end
+            z = DerivVariable(derivValues{:});
         end
         
-        function z_n = deriv(obj, order)
-            n = order;
+        function z_n = deriv(obj, n)
+            % n: order
             z_n = 0;
             for k = 0:n
                 z_n = z_n + nchoosek(n, k)*obj.x1.deriv(n - k)*obj.x2.deriv(k);

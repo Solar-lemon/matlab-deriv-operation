@@ -7,11 +7,9 @@ classdef DerivVariable < handle
     methods
         function obj = DerivVariable(varargin)
             % valueList = {x^(0), x^(1), ... x^(order)}
-            if numel(varargin) > 0
-                obj.order = numel(varargin) - 1;
-                obj.shape = size(varargin{1});
-                obj.derivValues = varargin;
-            end
+            obj.order = numel(varargin) - 1;
+            obj.shape = size(varargin{1});
+            obj.derivValues = varargin;
         end
         
         function out = deriv(obj, order)
