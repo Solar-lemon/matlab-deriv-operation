@@ -5,17 +5,17 @@ classdef(Abstract) FunDeriv < DerivOperation
     % deriv(obj, x, n) defines the set of derivatives of f
     % with respect to x.
     methods(Abstract)
-        % out = {f; df/dx; d^2f/dx^2; ..., d^nf/dx^n}
+        % out = [f; df/dx; d^2f/dx^2; ..., d^nf/dx^n]
         % n: order
-        out = deriv(obj, x, n);
+        out = deriv(obj, x, N);
     end
     
     methods
         % implement
         function z = forward(obj, var)
             x = var.deriv(0);
-            n = var.order;
-            derivValues = obj.deriv(x, n);
+            N = var.order;
+            derivValues = num2cell(obj.deriv(x, N));
             outerVar = DerivVariable(derivValues{:});
             
             z = DerivComposite(outerVar, var).forward();
