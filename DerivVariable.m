@@ -200,6 +200,12 @@ classdef DerivVariable < handle
             out = PowerDeriv(r).forward(obj);
         end
         
+        function out = sqrt(obj)
+            assert(all(obj.shape == [1, 1]),...
+                "The argument for sqrt() should be a scalar")
+            out = PowerDeriv(1/2).forward(obj);
+        end
+        
         function out = exp(obj)
             assert(all(obj.shape == [1, 1]),...
                 "The argument for exp() should be a scalar")
@@ -210,6 +216,24 @@ classdef DerivVariable < handle
             assert(all(obj.shape == [1, 1]),...
                 "The argument for log() should be a scalar")
             out = LogDeriv().forward(obj);
+        end
+        
+        function out = sin(obj)
+            assert(all(obj.shape == [1, 1]),...
+                "The argument for sin() should be a scalar")
+            out = SinDeriv().forward(obj);
+        end
+        
+        function out = cos(obj)
+            assert(all(obj.shape == [1, 1]),...
+                "The argument for cos() should be a scalar")
+            out = CosDeriv().forward(obj);
+        end
+        
+        function out = tan(obj)
+            assert(all(obj.shape == [1, 1]),...
+                "The argument for tan() should be a scalar")
+            out = obj.sin()/obj.cos();
         end
     end
     
