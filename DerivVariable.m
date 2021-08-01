@@ -57,10 +57,16 @@ classdef DerivVariable < handle
     % operator overloading and other oprators
     methods
         function out = plus(obj1, obj2)
+            obj1 = DerivVariable.wrapNumeric(obj1);
+            obj2 = DerivVariable.wrapNumeric(obj2);
+            
             out = DerivPlus(obj1, obj2).forward();
         end
         
         function out = minus(obj1, obj2)
+            obj1 = DerivVariable.wrapNumeric(obj1);
+            obj2 = DerivVariable.wrapNumeric(obj2);
+            
             out = DerivMinus(obj1, obj2).forward();
         end
         
@@ -78,18 +84,30 @@ classdef DerivVariable < handle
         end
         
         function out = times(obj1, obj2)
+            obj1 = DerivVariable.wrapNumeric(obj1);
+            obj2 = DerivVariable.wrapNumeric(obj2);
+            
             out = DerivTimes(obj1, obj2).forward();
         end
         
         function out = mtimes(obj1, obj2)
+            obj1 = DerivVariable.wrapNumeric(obj1);
+            obj2 = DerivVariable.wrapNumeric(obj2);
+            
             out = DerivMtimes(obj1, obj2).forward();
         end
         
         function out = mrdivide(obj1, obj2)
+            obj1 = DerivVariable.wrapNumeric(obj1);
+            obj2 = DerivVariable.wrapNumeric(obj2);
+            
             out = obj1*obj2.inverse();
         end
         
         function out = mldivide(obj1, obj2)
+            obj1 = DerivVariable.wrapNumeric(obj1);
+            obj2 = DerivVariable.wrapNumeric(obj2);
+            
             out = obj1.inverse()*obj2;
         end
         
@@ -100,6 +118,42 @@ classdef DerivVariable < handle
                 newDerivValues{n + 1} = obj.deriv(n).';
             end
             out = DerivVariable(newDerivValues{:});
+        end
+        
+        function out = horzcat(varargin)
+            N = 0;
+            numVar = numel(varargin);
+            for j = 1:numVar
+                varargin{j} = DerivVariable.wrapNumeric(varargin{j});
+                N = max(N, varargin{j}.order);
+            end
+            catDerivValues = cell(N + 1, 1);
+            for n = 0:N
+                temp = cell(numVar, 1);
+                for j = 1:numVar
+                    temp{j} = varargin{j}.deriv(n);
+                end
+                catDerivValues{n + 1} = horzcat(temp{:});
+            end
+            out = DerivVariable(catDerivValues{:});
+        end
+        
+        function out = vertcat(varargin)
+            N = 0;
+            numVar = numel(varargin);
+            for i = 1:numVar
+                varargin{i} = DerivVariable.wrapNumeric(varargin{i});
+                N = max(N, varargin{i}.order);
+            end
+            catDerivValues = cell(N + 1, 1);
+            for n = 0:N
+                temp = cell(numVar, 1);
+                for i = 1:numVar
+                    temp{i} = varargin{i}.deriv(n);
+                end
+                catDerivValues{n + 1} = vertcat(temp{:});
+            end
+            out = DerivVariable(catDerivValues{:});
         end
         
         % other operators
@@ -160,6 +214,14 @@ classdef DerivVariable < handle
     end
     
     methods(Static)
+        function out = wrapNumeric(value)
+            if isa(value, 'numeric')
+                out = DerivVariable(value);
+            elseif isa(value, 'DerivVariable')
+                out = value;
+            end
+        end
+        
         function test()
             clc
             
