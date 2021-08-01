@@ -10,21 +10,21 @@ classdef PowerDeriv < FunDeriv
         end
         
         % implement
-        function out = deriv(obj, x, n)
-            coeff = nan(n + 1, 1);
-            basis = nan(n + 1, 1);
+        function out = deriv(obj, x, N)
+            coeff = nan(N + 1, 1);
+            basis = nan(N + 1, 1);
             
             coeffTemp = 1;
-            basisTemp = power(x, obj.r - n);
+            basisTemp = power(x, obj.r - N);
             
-            for k = 0:n
-                coeff(k + 1) = coeffTemp;
-                basis(n + 1 - k) = basisTemp;
+            for n = 0:N
+                coeff(n + 1) = coeffTemp;
+                basis(N + 1 - n) = basisTemp;
                 
-                coeffTemp = coeffTemp*(obj.r - k);
+                coeffTemp = coeffTemp*(obj.r - n);
                 basisTemp = basisTemp*x;
             end
-            out = num2cell(coeff.*basis);
+            out = coeff.*basis;
         end
     end
     
@@ -36,7 +36,7 @@ classdef PowerDeriv < FunDeriv
             power = PowerDeriv(3);
             derivValues = power.deriv(1, 3);
             fprintf("derivValues: \n")
-            disp(cell2mat(derivValues).')
+            disp(derivValues.')
             
             fprintf("1. Using forward methods \n")
             t = 2;

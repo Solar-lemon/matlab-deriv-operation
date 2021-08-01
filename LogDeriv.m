@@ -1,11 +1,11 @@
 classdef LogDeriv < FunDeriv
     methods
         % implement
-        function out = deriv(obj, x, n)
-            out = cell(n + 1, 1);
-            out{1} = log(x);
-            if n > 0
-                derivValues = PowerDeriv(-1).deriv(x, n - 1);
+        function out = deriv(obj, x, N)
+            out = nan(N + 1, 1);
+            out(1) = log(x);
+            if N > 0
+                derivValues = PowerDeriv(-1).deriv(x, N - 1);
                 out(2:end) = derivValues;
             end
         end

@@ -1,9 +1,8 @@
 classdef ExpDeriv < FunDeriv
     methods
         % implement
-        function out = deriv(obj, x, n)
-            out = exp(x)*ones(n + 1, 1);
-            out = num2cell(out);
+        function out = deriv(obj, x, N)
+            out = exp(x)*ones(N + 1, 1);
         end
     end
     
