@@ -30,25 +30,50 @@ classdef DerivVariable < handle
             obj.shape = size(varargin{1});
         end
         
-        function setDeriv(obj, order, deriv)
+        function setDeriv(obj, deriv, order, maintainOrder)
+            if nargin < 4 || isempty(maintainOrder)
+                maintainOrder = true;
+            end
+            if nargin < 3 || isempty(order)
+                order = 1;
+            end
+            
             if isa(deriv, "numeric")
-                obj.setDerivValue(order, deriv);
+                obj.setDerivValue(deriv, order, maintainOrder);
             elseif isa(deriv, "DerivVariable")
-                obj.setDerivVar(order, deriv);
+                obj.setDerivVar(deriv, order, maintainOrder);
             end
         end
         
-        function setDerivValue(obj, order, derivValue)
+        function setDerivValue(obj, derivValue, order, maintainOrder)
+            if nargin < 4 || isempty(maintainOrder)
+                maintainOrder = true;
+            end
+            if nargin < 3 || isempty(order)
+                order = 1;
+            end
             assert(order >= 0,...
                 "The order must be greater than or equal to 0.")
             if order > obj.order + 1
                 return
             end
+            if order > obj.order
+                if maintainOrder
+                    return
+                end
+            end
+            
             obj.values{1 + order} = derivValue;
             obj.setShape(obj.values{:}, derivValue);
         end
         
-        function setDerivVar(obj, order, derivVar)
+        function setDerivVar(obj, derivVar, order, maintainOrder)
+            if nargin < 4 || isempty(maintainOrder)
+                maintainOrder = true;
+            end
+            if nargin < 3 || isempty(order)
+                order = 1;
+            end
             assert(order >= 0,...
                 "The order must be greater than or equal to 0.")
             assert(isa(derivVar, "DerivVariable"),...
@@ -56,7 +81,14 @@ classdef DerivVariable < handle
             if order > obj.order + 1
                 return
             end
-            updatedValues = [obj.values(1:order), derivVar.values];
+            
+            if maintainOrder
+                updatedValues = [...
+                    obj.values(1:order),...
+                    derivVar.values(1:1 + obj.order - order)];
+            else
+                updatedValues = [obj.values(1:order), derivVar.values];
+            end
             obj.values = updatedValues;
         end
         

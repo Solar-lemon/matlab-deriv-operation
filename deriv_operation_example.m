@@ -52,8 +52,8 @@ disp(B)
 x = DerivVariable([0; 0]);
 u = 1;
 
-x.setDeriv(1, A*x + B*u); % the value of x^{(1)} has been applied to x.
-x.setDeriv(1, A*x + B*u); % the value of x^{(2)} has been applied to x.
+x.setDerivVar(A*x + B*u, 1, false); % the value of x^{(1)} has been applied to x.
+x.setDerivVar(A*x + B*u, 1, false); % the value of x^{(2)} has been applied to x.
 
 fprintf("1. Using automatic differentiation \n")
 fprintf("x_dot: \n")
