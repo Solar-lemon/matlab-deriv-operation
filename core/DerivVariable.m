@@ -24,20 +24,44 @@ classdef DerivVariable < handle
     end
     % set and get methods
     methods
-        function setDeriv(obj, order, value)
+        function setDeriv(obj, order, deriv)
+            if isa(deriv, "numeric")
+                obj.setDerivValue(order, deriv);
+            elseif isa(deriv, "DerivVariable")
+                obj.setDerivVar(order, deriv);
+            end
+        end
+        
+        function setDerivValue(obj, order, derivValue)
             assert(order >= 0,...
                 "The order must be greater than or equal to 0.")
-            if order > obj.order
+            if order > obj.order + 1
                 return
             end
-            obj.derivValues{order + 1} = value;
+            obj.derivValues{1 + order} = derivValue;
+            obj.order = numel(obj.derivValues) - 1;
+            if isempty(obj.shape)
+                obj.shape = size(derivValue);
+            end
+        end
+        
+        function setDerivVar(obj, order, derivVar)
+            assert(order >= 1,...
+                "The order must be greater than or equal to 1.")
+            assert(isa(derivVar, "DerivVariable"),...
+                "The derivVar must be an instance of DerivVariable.")
+            if order > obj.order + 1
+                return
+            end
+            
+            updatedValues = [obj.derivValues(1:order), derivVar.derivValues];
+            obj.order = numel(updatedValues) - 1;
+            obj.derivValues = updatedValues;
         end
         
         function setDerivValues(obj, varargin)
-            if isempty(obj.order)
-                obj.order = numel(varargin) - 1;
-                obj.shape = size(varargin{1});
-            end
+            obj.order = numel(varargin) - 1;
+            obj.shape = size(varargin{1});
             obj.derivValues = varargin;
         end
         
