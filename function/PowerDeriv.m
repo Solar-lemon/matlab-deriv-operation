@@ -11,15 +11,15 @@ classdef PowerDeriv < FunDeriv
         
         % implement
         function out = deriv(obj, x, N)
-            coeff = nan(N + 1, 1);
-            basis = nan(N + 1, 1);
+            coeff = nan(1 + N, 1);
+            basis = nan(1 + N, 1);
             
             coeffTemp = 1;
             basisTemp = power(x, obj.r - N);
             
             for n = 0:N
-                coeff(n + 1) = coeffTemp;
-                basis(N + 1 - n) = basisTemp;
+                coeff(1 + n) = coeffTemp;
+                basis(1 + N - n) = basisTemp;
                 
                 coeffTemp = coeffTemp*(obj.r - n);
                 basisTemp = basisTemp*x;

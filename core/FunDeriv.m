@@ -15,8 +15,8 @@ classdef(Abstract) FunDeriv < DerivOperation
         function z = forward(obj, var)
             x = var.deriv(0);
             N = var.order;
-            derivValues = num2cell(obj.deriv(x, N));
-            outerVar = DerivVariable(derivValues{:});
+            values = num2cell(obj.deriv(x, N));
+            outerVar = DerivVariable(values{:});
             
             z = DerivComposite(outerVar, var).forward();
         end

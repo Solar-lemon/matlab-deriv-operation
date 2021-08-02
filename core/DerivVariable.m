@@ -1,15 +1,16 @@
 classdef DerivVariable < handle
     properties
-        order
+        values
         shape
-        derivValues
+    end
+    properties(Dependent)
+        order
     end
     methods
         function obj = DerivVariable(varargin)
-            % valueList = {x^(0), x^(1), ... x^(order)}
-            obj.order = numel(varargin) - 1;
-            obj.shape = size(varargin{1});
-            obj.derivValues = varargin;
+            % values = {x^(0), x^(1), ... x^(order)}
+            obj.values = varargin;
+            obj.setShape(varargin{:});
         end
         
         function out = deriv(obj, order)
@@ -19,36 +20,95 @@ classdef DerivVariable < handle
                 out = zeros(obj.shape);
                 return
             end
-            out = obj.derivValues{order + 1};
+            out = obj.values{1 + order};
         end
     end
     % set and get methods
     methods
-        function setDeriv(obj, order, value)
-            assert(order >= 0,...
-                "The order must be greater than or equal to 0.")
-            if order > obj.order
-                return
-            end
-            obj.derivValues{order + 1} = value;
+        function setShape(obj, varargin)
+            DerivVariable.checkShapeCompatibility(varargin{:});
+            obj.shape = size(varargin{1});
         end
         
-        function setDerivValues(obj, varargin)
-            if isempty(obj.order)
-                obj.order = numel(varargin) - 1;
-                obj.shape = size(varargin{1});
+        function setDeriv(obj, deriv, order, maintainOrder)
+            if nargin < 4 || isempty(maintainOrder)
+                maintainOrder = true;
             end
-            obj.derivValues = varargin;
+            if nargin < 3 || isempty(order)
+                order = 1;
+            end
+            
+            if isa(deriv, "numeric")
+                obj.setDerivValue(deriv, order, maintainOrder);
+            elseif isa(deriv, "DerivVariable")
+                obj.setDerivVar(deriv, order, maintainOrder);
+            end
+        end
+        
+        function setDerivValue(obj, derivValue, order, maintainOrder)
+            if nargin < 4 || isempty(maintainOrder)
+                maintainOrder = true;
+            end
+            if nargin < 3 || isempty(order)
+                order = 1;
+            end
+            assert(order >= 0,...
+                "The order must be greater than or equal to 0.")
+            if order > obj.order + 1
+                return
+            end
+            if order > obj.order
+                if maintainOrder
+                    return
+                end
+            end
+            
+            obj.values{1 + order} = derivValue;
+            obj.setShape(obj.values{:}, derivValue);
+        end
+        
+        function setDerivVar(obj, derivVar, order, maintainOrder)
+            if nargin < 4 || isempty(maintainOrder)
+                maintainOrder = true;
+            end
+            if nargin < 3 || isempty(order)
+                order = 1;
+            end
+            assert(order >= 0,...
+                "The order must be greater than or equal to 0.")
+            assert(isa(derivVar, "DerivVariable"),...
+                "The derivVar must be an instance of DerivVariable.")
+            if order > obj.order + 1
+                return
+            end
+            
+            if maintainOrder
+                updatedValues = [...
+                    obj.values(1:order),...
+                    derivVar.values(1:1 + obj.order - order)];
+            else
+                updatedValues = [obj.values(1:order), derivVar.values];
+            end
+            obj.values = updatedValues;
+        end
+        
+        function setValues(obj, varargin)
+            obj.values = varargin;
+            obj.setShape(varargin{:});
+        end
+        
+        function out = get.order(obj)
+            out = numel(obj.values) - 1;
         end
         
         function out = flatValue(obj)
             d = prod(obj.shape);
-            n = obj.order;
-            out = nan(d*(n + 1), 1);
+            N = obj.order;
+            out = nan(d*(1 + N), 1);
             
             startIndex = 0;
-            for i = 1:n + 1
-                out(startIndex + 1:startIndex + d, :) = obj.derivValues{i};
+            for i = 1:N + 1
+                out(startIndex + 1:startIndex + d, :) = obj.values{i};
                 startIndex = startIndex + d;
             end
         end
@@ -72,15 +132,15 @@ classdef DerivVariable < handle
         
         function out = uminus(obj)
             N = obj.order;
-            newDerivValues = cell(N + 1, 1);
+            newValues = cell(1, 1 + N);
             for n = 0:N
-                newDerivValues{n + 1} = -obj.derivValues{n + 1};
+                newValues{1 + n} = -obj.deriv(n);
             end
-            out = DerivVariable(newDerivValues{:});
+            out = DerivVariable(newValues{:});
         end
         
         function out = uplus(obj)
-            out = DerivVariable(obj.derivValues{:});
+            out = DerivVariable(obj.values{:});
         end
         
         function out = times(obj1, obj2)
@@ -113,11 +173,11 @@ classdef DerivVariable < handle
         
         function out = transpose(obj)
             N = obj.order;
-            newDerivValues = cell(N + 1, 1);
+            newValues = cell(1, 1 + N);
             for n = 0:N
-                newDerivValues{n + 1} = obj.deriv(n).';
+                newValues{1 + n} = obj.deriv(n).';
             end
-            out = DerivVariable(newDerivValues{:});
+            out = DerivVariable(newValues{:});
         end
         
         function out = horzcat(varargin)
@@ -127,15 +187,15 @@ classdef DerivVariable < handle
                 varargin{j} = DerivVariable.wrapNumeric(varargin{j});
                 N = max(N, varargin{j}.order);
             end
-            catDerivValues = cell(N + 1, 1);
+            catvalues = cell(1, 1 + N);
             for n = 0:N
                 temp = cell(numVar, 1);
                 for j = 1:numVar
                     temp{j} = varargin{j}.deriv(n);
                 end
-                catDerivValues{n + 1} = horzcat(temp{:});
+                catvalues{1 + n} = horzcat(temp{:});
             end
-            out = DerivVariable(catDerivValues{:});
+            out = DerivVariable(catvalues{:});
         end
         
         function out = vertcat(varargin)
@@ -145,15 +205,15 @@ classdef DerivVariable < handle
                 varargin{i} = DerivVariable.wrapNumeric(varargin{i});
                 N = max(N, varargin{i}.order);
             end
-            catDerivValues = cell(N + 1, 1);
+            catvalues = cell(1, 1 + N);
             for n = 0:N
                 temp = cell(numVar, 1);
                 for i = 1:numVar
                     temp{i} = varargin{i}.deriv(n);
                 end
-                catDerivValues{n + 1} = vertcat(temp{:});
+                catvalues{1 + n} = vertcat(temp{:});
             end
-            out = DerivVariable(catDerivValues{:});
+            out = DerivVariable(catvalues{:});
         end
         
         % other operators
@@ -174,16 +234,16 @@ classdef DerivVariable < handle
             assert(all(obj.shape == [3, 1]),...
                 "The shape of the vector should be [3, 1]")
             N = obj.order;
-            newDerivValues = cell(N + 1, 1);
+            newValues = cell(1, 1 + N);
             for n = 0:N
                 v = obj.deriv(n);
                 v_hat = [...
                     0, -v(3), v(2);
                     v(3), 0, -v(1);
                     -v(2), v(1), 0];
-               newDerivValues{n + 1} = v_hat;
+               newValues{1 + n} = v_hat;
             end
-            out = DerivVariable(newDerivValues{:});
+            out = DerivVariable(newValues{:});
         end
         
         function out = cross(obj1, obj2)
@@ -243,6 +303,17 @@ classdef DerivVariable < handle
                 out = DerivVariable(value);
             elseif isa(value, 'DerivVariable')
                 out = value;
+            end
+        end
+        
+        function checkShapeCompatibility(varargin)
+            if numel(varargin) < 2
+                return
+            end
+            shape = size(varargin{1});
+            for i = 1:numel(varargin)
+                assert(all(size(varargin{i}) == shape),...
+                    "The size for each value is not consistent.");
             end
         end
         

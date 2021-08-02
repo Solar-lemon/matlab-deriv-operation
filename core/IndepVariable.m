@@ -1,13 +1,13 @@
 classdef IndepVariable < DerivVariable
     methods
         function obj = IndepVariable(value, order)
-            derivValues = zeros(order + 1, 1);
-            derivValues(1) = value;
+            values = zeros(1 + order, 1);
+            values(1) = value;
             if order > 0
-                derivValues(2) = 1;
+                values(2) = 1;
             end
-            derivValues = num2cell(derivValues);
-            obj = obj@DerivVariable(derivValues{:});
+            values = num2cell(values);
+            obj = obj@DerivVariable(values{:});
         end
     end
 end

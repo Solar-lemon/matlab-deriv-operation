@@ -13,12 +13,12 @@ classdef DerivTimes < DerivOperation
         % implement
         function z = forward(obj)
             N = max(obj.x1.order, obj.x2.order);
-            derivValues = cell(N + 1, 1);
+            values = cell(1 + N, 1);
             
             for n = 0:N
-                derivValues{n + 1} = obj.deriv(n);
+                values{1 + n} = obj.deriv(n);
             end
-            z = DerivVariable(derivValues{:});
+            z = DerivVariable(values{:});
         end
         
         function z_n = deriv(obj, n)
@@ -50,7 +50,7 @@ classdef DerivTimes < DerivOperation
             fprintf("0-th order deriv: \n")
             disp([1, t^2])
             fprintf("1-th order deriv: \n")
-            disp([1, 2*t])
+            disp([0, 2*t])
         end
     end
 end
