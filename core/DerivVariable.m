@@ -26,7 +26,7 @@ classdef DerivVariable < handle
     % set and get methods
     methods
         function setShape(obj, varargin)
-            DerivVariable.checkShapeCompatibility(varargin{:});
+%             DerivVariable.checkShapeCompatibility(varargin{:});
             obj.shape = size(varargin{1});
         end
         
@@ -184,14 +184,28 @@ classdef DerivVariable < handle
             N = 0;
             numVar = numel(varargin);
             for j = 1:numVar
-                varargin{j} = DerivVariable.wrapNumeric(varargin{j});
-                N = max(N, varargin{j}.order);
+                if isa(varargin{j}, 'DerivVariable')
+                    N = max(N, varargin{j}.order);
+                end
             end
             catvalues = cell(1, 1 + N);
-            for n = 0:N
-                temp = cell(numVar, 1);
+            
+            temp = cell(numVar, 1);
+            for j = 1:numVar
+                if isa(varargin{j}, 'DerivVariable')
+                    temp{j} = varargin{j}.deriv(0);
+                else
+                    temp{j} = varargin{j};
+                end
+            end
+            catvalues{1} = horzcat(temp{:});
+            for n = 1:N
                 for j = 1:numVar
-                    temp{j} = varargin{j}.deriv(n);
+                    if isa(varargin{j}, 'DerivVariable')
+                        temp{j} = varargin{j}.deriv(n);
+                    else
+                        temp{j} = zeros(size(varargin{j}));
+                    end
                 end
                 catvalues{1 + n} = horzcat(temp{:});
             end
@@ -202,14 +216,28 @@ classdef DerivVariable < handle
             N = 0;
             numVar = numel(varargin);
             for i = 1:numVar
-                varargin{i} = DerivVariable.wrapNumeric(varargin{i});
-                N = max(N, varargin{i}.order);
+                if isa(varargin{i}, 'DerivVariable')
+                    N = max(N, varargin{i}.order);
+                end
             end
             catvalues = cell(1, 1 + N);
-            for n = 0:N
-                temp = cell(numVar, 1);
+            
+            temp = cell(numVar, 1);
+            for i = 1:numVar
+                if isa(varargin{i}, 'DerivVariable')
+                    temp{i} = varargin{i}.deriv(0);
+                else
+                    temp{i} = varargin{i};
+                end
+            end
+            catvalues{1} = vertcat(temp{:});
+            for n = 1:N
                 for i = 1:numVar
-                    temp{i} = varargin{i}.deriv(n);
+                    if isa(varargin{i}, 'DerivVariable')
+                        temp{i} = varargin{i}.deriv(n);
+                    else
+                        temp{i} = zeros(size(varargin{i}));
+                    end
                 end
                 catvalues{1 + n} = vertcat(temp{:});
             end
