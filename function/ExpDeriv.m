@@ -2,7 +2,7 @@ classdef ExpDeriv < FunDeriv
     methods
         % implement
         function out = deriv(obj, x, N)
-            out = exp(x)*ones(N + 1, 1);
+            out = exp(x)*ones(1 + N, 1);
         end
     end
     

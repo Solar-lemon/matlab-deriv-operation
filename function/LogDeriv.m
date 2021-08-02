@@ -2,7 +2,7 @@ classdef LogDeriv < FunDeriv
     methods
         % implement
         function out = deriv(obj, x, N)
-            out = nan(N + 1, 1);
+            out = nan(1 + N, 1);
             out(1) = log(x);
             if N > 0
                 derivValues = PowerDeriv(-1).deriv(x, N - 1);

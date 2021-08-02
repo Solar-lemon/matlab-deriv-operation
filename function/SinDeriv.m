@@ -2,20 +2,20 @@ classdef SinDeriv < FunDeriv
     methods
         % implement
         function out = deriv(obj, x, N)
-            out = nan(N + 1, 1);
+            out = nan(1 + N, 1);
             s = sin(x);
             c = cos(x);
             
             for n = 0:N
                 switch mod(n, 4)
                     case 0
-                        out(n + 1) = s;
+                        out(1 + n) = s;
                     case 1
-                        out(n + 1) = c;
+                        out(1 + n) = c;
                     case 2
-                        out(n + 1) = -s;
+                        out(1 + n) = -s;
                     case 3
-                        out(n + 1) = -c;
+                        out(1 + n) = -c;
                 end
             end
         end
