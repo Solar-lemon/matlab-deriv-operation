@@ -258,6 +258,10 @@ classdef DerivVariable < handle
             out = PowerDeriv(1/2).forward(normSqVar);
         end
         
+        function out = normalize(obj)
+            out = obj/obj.norm();
+        end
+        
         function out = hat(obj)
             assert(all(obj.shape == [3, 1]),...
                 "The shape of the vector should be [3, 1]")
