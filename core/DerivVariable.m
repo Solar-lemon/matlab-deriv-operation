@@ -101,6 +101,15 @@ classdef DerivVariable < handle
             out = numel(obj.values) - 1;
         end
         
+        function out = get(obj, varargin)
+            newValues = cell(size(obj.values));
+            for j = 1:numel(obj.values)
+                temp = obj.values{j};
+                newValues{j} = temp(varargin{:});
+            end
+            out = DerivVariable(newValues{:});
+        end
+        
         function out = flatValue(obj)
             d = prod(obj.shape);
             N = obj.order;
